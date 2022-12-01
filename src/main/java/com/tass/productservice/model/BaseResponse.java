@@ -11,4 +11,9 @@ public class BaseResponse {
         this.code = 1;
         this.message = "SUCCESS";
     }
+
+    public BaseResponse(int code, String messsage){
+        this.code = code;
+        this.message = messsage;
+    }
 }
