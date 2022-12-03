@@ -12,6 +12,11 @@ public class BaseResponse {
         this.message = "SUCCESS";
     }
 
+    public BaseResponse(ERROR error){
+        this.code = error.code;
+        this.message = error.message;
+    }
+
     public BaseResponse(int code, String messsage){
         this.code = code;
         this.message = messsage;

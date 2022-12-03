@@ -1,17 +1,22 @@
 package com.tass.productservice.services;
 
 import com.tass.productservice.database.entities.Category;
+import com.tass.productservice.database.entities.CategoryRelationship;
+import com.tass.productservice.database.repository.CategoryRelationshipRepository;
 import com.tass.productservice.database.repository.CategoryRepository;
 import com.tass.productservice.model.ApiException;
 import com.tass.productservice.model.BaseResponse;
 import com.tass.productservice.model.ERROR;
 import com.tass.productservice.model.request.CategoryRequest;
 import com.tass.productservice.utils.Constant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class CategoryService {
@@ -19,6 +24,41 @@ public class CategoryService {
 //    private Logger
     @Autowired
     CategoryRepository categoryRepository;
+
+    @Autowired
+    CategoryRelationshipRepository categoryRelationshipRepository;
+
+    @Transactional
+    public BaseResponse deleteCategory(Long id) throws ApiException{
+        //step 1 : del category
+        categoryRepository.deleteById(id);
+
+        // step 2 : del children
+        this.deleteCategoryImpl(id);
+        return new BaseResponse();
+    }
+
+    private void deleteCategoryImpl(long id) throws ApiException{
+        List<CategoryRelationship> listChildren = categoryRelationshipRepository.findAllChildrenByParentId(id);
+
+        if (CollectionUtils.isEmpty(listChildren))
+            return;
+
+        List<CategoryRelationship> deleteRelationship = new ArrayList<>();
+        for (CategoryRelationship cr :  listChildren){
+
+            long countParent = categoryRelationshipRepository.countParent(cr.getPk().getChildrenId());
+
+            if (countParent == 1){
+                deleteRelationship.add(cr);
+                this.deleteCategoryImpl(cr.getPk().getChildrenId());
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(deleteRelationship)){
+            categoryRelationshipRepository.deleteAll(deleteRelationship);
+        }
+    }
 
     @Transactional
     public BaseResponse createCategory(CategoryRequest request) throws ApiException{
@@ -34,6 +74,7 @@ public class CategoryService {
             if (checkParentOpt.isEmpty()){
                 throw new ApiException(ERROR.INVALID_PARAM , "parent is invalid");
             }
+
         }
 
         Category category = new Category();
@@ -44,8 +85,14 @@ public class CategoryService {
 
         categoryRepository.save(category);
 
-        // su dung many to many key work xu ly case co parent
+        if (!request.checkIsRoot()){
+            // tao quan he
 
+            CategoryRelationship categoryRelationship = new CategoryRelationship();
+            CategoryRelationship.PK pk = new CategoryRelationship.PK(request.getParentId(), category.getId());
+            categoryRelationship.setPk(pk);
+            categoryRelationshipRepository.save(categoryRelationship);
+        }
 
         return new BaseResponse();
     }
