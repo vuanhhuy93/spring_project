@@ -1,5 +1,6 @@
 package com.tass.productservice.database.entities;
 
+import com.tass.productservice.utils.Constant;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,5 +24,9 @@ public class Category {
     private String icon;
 
     private int isRoot;
+
+    public boolean checkIsRoot(){
+        return isRoot == Constant.ONOFF.ON;
+    }
 
 }
