@@ -8,6 +8,7 @@ import com.tass.productservice.model.ApiException;
 import com.tass.productservice.model.BaseResponse;
 import com.tass.productservice.model.ERROR;
 import com.tass.productservice.model.request.CategoryRequest;
+import com.tass.productservice.model.response.SearchCategoryResponse;
 import com.tass.productservice.utils.Constant;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,29 @@ public class CategoryService {
 
     @Autowired
     CategoryRelationshipRepository categoryRelationshipRepository;
+
+
+    // search
+
+
+    public SearchCategoryResponse search(Integer isRoot , String name, Integer page, Integer pageSize){
+        if (page == null || page < 1){
+            page = 1;
+        }
+        if (pageSize == null || pageSize < 1){
+            pageSize = 10;
+        }
+
+        SearchCategoryResponse.Data data = new SearchCategoryResponse.Data();
+        data.setCurrentPage(page);
+        data.setPageSize(pageSize);
+
+        categoryRepository.searchCategory(isRoot , name, page, pageSize, data);
+
+        SearchCategoryResponse response = new SearchCategoryResponse();
+        response.setData(data);
+        return response;
+    }
 
     @Transactional
     public BaseResponse deleteCategory(Long id) throws ApiException {
