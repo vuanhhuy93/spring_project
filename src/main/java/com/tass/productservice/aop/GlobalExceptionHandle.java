@@ -4,7 +4,6 @@ package com.tass.productservice.aop;
 import com.tass.productservice.model.ApiException;
 import com.tass.productservice.model.BaseResponse;
 import com.tass.productservice.model.ERROR;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,6 +23,8 @@ public class GlobalExceptionHandle extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ResponseEntity<BaseResponse> handleInternalException(Exception ex) {
+
+        ex.printStackTrace();
         return new ResponseEntity<>(new BaseResponse(ERROR.SYSTEM_ERROR),
             HttpStatus.INTERNAL_SERVER_ERROR);
     }

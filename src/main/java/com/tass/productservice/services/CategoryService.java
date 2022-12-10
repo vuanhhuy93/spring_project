@@ -7,7 +7,9 @@ import com.tass.productservice.database.repository.CategoryRepository;
 import com.tass.productservice.model.ApiException;
 import com.tass.productservice.model.BaseResponse;
 import com.tass.productservice.model.ERROR;
+import com.tass.productservice.model.dto.CategoryInfo;
 import com.tass.productservice.model.request.CategoryRequest;
+import com.tass.productservice.model.response.CategoryDetailResponse;
 import com.tass.productservice.model.response.SearchCategoryResponse;
 import com.tass.productservice.utils.Constant;
 import java.util.ArrayList;
@@ -23,17 +25,52 @@ import org.springframework.util.CollectionUtils;
 @Service
 @Log4j2
 public class CategoryService {
-
-    //    private Logger
     @Autowired
     CategoryRepository categoryRepository;
 
     @Autowired
     CategoryRelationshipRepository categoryRelationshipRepository;
 
+    public CategoryDetailResponse getById(long id) {
+        CategoryDetailResponse response = new CategoryDetailResponse();
+        Optional<Category> categoryOptional = categoryRepository.findById(id);
 
-    // search
+        if (categoryOptional.isEmpty()) {
+            response.setCode(ERROR.INVALID_PARAM.code);
+            return response;
+        }
 
+        Category category = categoryOptional.get();
+        CategoryInfo categoryInfo = new CategoryInfo(category);
+
+        List<CategoryInfo> parents = new ArrayList<>();
+        List<CategoryInfo> child = new ArrayList<>();
+
+        List<Category> parentEntity = category.getParent();
+        List<Category> childEntity = category.getChild();
+
+        if (!CollectionUtils.isEmpty(parentEntity)){
+
+            for (Category entity : parentEntity ){
+
+                parents.add(new CategoryInfo(entity));
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(childEntity)){
+
+            for (Category entity : childEntity ){
+
+                child.add(new CategoryInfo(entity));
+            }
+        }
+
+        categoryInfo.setChildren(child);
+        categoryInfo.setParents(parents);
+
+        response.setData(categoryInfo);
+        return  response;
+    }
 
     public SearchCategoryResponse search(Integer isRoot , String name, Integer page, Integer pageSize){
         if (page == null || page < 1){
@@ -63,7 +100,6 @@ public class CategoryService {
         this.deleteCategoryImpl(id);
         return new BaseResponse();
     }
-
 
     @Transactional
     public BaseResponse editCategory(Long id, CategoryRequest request) throws ApiException {

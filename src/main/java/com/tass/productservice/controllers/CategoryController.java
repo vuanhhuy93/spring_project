@@ -4,6 +4,7 @@ import com.tass.productservice.model.ApiException;
 import com.tass.productservice.model.BaseResponse;
 import com.tass.productservice.model.request.CategoryRequest;
 
+import com.tass.productservice.model.response.CategoryDetailResponse;
 import com.tass.productservice.model.response.SearchCategoryResponse;
 import com.tass.productservice.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ public class CategoryController extends BaseController{
 
     @Autowired
     CategoryService categoryService;
+
+    @GetMapping("/{id}")
+    public CategoryDetailResponse findById(@PathVariable Long id){
+        return categoryService.getById(id);
+    }
 
     @GetMapping
     public SearchCategoryResponse search(@RequestParam(name = "is_root" , required = false) Integer isRoot , @RequestParam(required = false) String name,

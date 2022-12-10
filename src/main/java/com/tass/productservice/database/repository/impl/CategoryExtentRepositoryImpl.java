@@ -6,14 +6,15 @@ import com.tass.productservice.model.response.SearchCategoryResponse;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Session;
+
 
 public class CategoryExtentRepositoryImpl implements CategoryExtentRepository {
     @PersistenceContext
-    Session session;
+    EntityManager entityManager;
 
 
     public void searchCategory(Integer isRoot, String name, Integer page, Integer pageSize,
@@ -35,7 +36,7 @@ public class CategoryExtentRepositoryImpl implements CategoryExtentRepository {
 
         String sqlCount = "SELECT count(c) " + baseSql;
 
-        Query query = session.createQuery(sqlCount);
+        Query query = entityManager.createQuery(sqlCount);
 
         Object totalItemValue = query.getSingleResult();
 
@@ -53,7 +54,7 @@ public class CategoryExtentRepositoryImpl implements CategoryExtentRepository {
             String querySql =
                 "SELECT new com.tass.productservice.model.dto.CategoryInfo(c.id, c.name, c.icon, c.description, c.isRoot) " +
                     baseSql;
-            Query queryItem = session.createQuery(querySql, CategoryInfo.class);
+            Query queryItem = entityManager.createQuery(querySql, CategoryInfo.class);
 
 
             page--;
