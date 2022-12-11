@@ -4,6 +4,7 @@ import com.tass.productservice.database.entities.Category;
 import com.tass.productservice.database.entities.CategoryRelationship;
 import com.tass.productservice.database.repository.CategoryRelationshipRepository;
 import com.tass.productservice.database.repository.CategoryRepository;
+import com.tass.productservice.domain.CategoryDomain;
 import com.tass.productservice.model.ApiException;
 import com.tass.productservice.model.BaseResponse;
 import com.tass.productservice.model.ERROR;
@@ -31,6 +32,9 @@ public class CategoryService {
     @Autowired
     CategoryRelationshipRepository categoryRelationshipRepository;
 
+    @Autowired
+    CategoryDomain categoryDomain;
+
     public CategoryDetailResponse getById(long id) {
         CategoryDetailResponse response = new CategoryDetailResponse();
         Optional<Category> categoryOptional = categoryRepository.findById(id);
@@ -42,31 +46,7 @@ public class CategoryService {
 
         Category category = categoryOptional.get();
         CategoryInfo categoryInfo = new CategoryInfo(category);
-
-        List<CategoryInfo> parents = new ArrayList<>();
-        List<CategoryInfo> child = new ArrayList<>();
-
-        List<Category> parentEntity = category.getParent();
-        List<Category> childEntity = category.getChild();
-
-        if (!CollectionUtils.isEmpty(parentEntity)){
-
-            for (Category entity : parentEntity ){
-
-                parents.add(new CategoryInfo(entity));
-            }
-        }
-
-        if (!CollectionUtils.isEmpty(childEntity)){
-
-            for (Category entity : childEntity ){
-
-                child.add(new CategoryInfo(entity));
-            }
-        }
-
-        categoryInfo.setChildren(child);
-        categoryInfo.setParents(parents);
+        categoryDomain.setLinkedInfoCategory(categoryInfo , category);
 
         response.setData(categoryInfo);
         return  response;
@@ -213,6 +193,8 @@ public class CategoryService {
                 new CategoryRelationship.PK(request.getParentId(), category.getId());
             categoryRelationship.setPk(pk);
             categoryRelationshipRepository.save(categoryRelationship);
+
+            categoryDomain.updateToRedis(pk);
         }
 
         return new BaseResponse();
