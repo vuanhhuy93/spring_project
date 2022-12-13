@@ -22,6 +22,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetailsService;
 
 
+
+
     public WebSecurity(UserDetailServiceImpl userDetailsServiceImpl) {
         passwordEncoder = new BCryptPasswordEncoder();
         userDetailsService = userDetailsServiceImpl;
