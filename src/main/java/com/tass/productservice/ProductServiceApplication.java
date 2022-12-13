@@ -4,14 +4,20 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 @Log4j2
 public class ProductServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ProductServiceApplication.class, args);
+//        SpringApplication.run(ProductServiceApplication.class, args);
+
+    BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        System.out.println(bCryptPasswordEncoder.encode("123456"));
     }
     @EventListener(ApplicationReadyEvent.class)
     private void serverReady(){
@@ -32,6 +38,10 @@ public class ProductServiceApplication {
         log.info("-----------------------------------");
 
 
+    }
+    @Bean
+    public PasswordEncoder bCryptPasswordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
 }

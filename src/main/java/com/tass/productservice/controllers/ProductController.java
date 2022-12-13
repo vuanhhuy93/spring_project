@@ -7,6 +7,7 @@ import com.tass.productservice.services.ProductService;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ public class ProductController extends BaseController{
     ProductService productService;
 
     @PostMapping
+    @Secured(value = {"CATEGORY_ALL"})
     public ResponseEntity<BaseResponse> create(@RequestBody ProductRequest request){
         return createdResponse(productService.createdProduct(request));
     }
